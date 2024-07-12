@@ -1,9 +1,6 @@
 import { Button } from "@/components/ui/button";
 import {
   Form,
-  FormCheckbox,
-  FormCombobox,
-  FormElement,
   FormField,
   FormInput,
   FormRadioGroup,
@@ -22,10 +19,10 @@ import {
 } from "@/components/ui/select";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createInsertSchema } from "drizzle-zod";
-import { Link, Stack, useRouter } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import * as React from "react";
 import { useForm } from "react-hook-form";
-import { Alert, Platform, Pressable, ScrollView, View } from "react-native";
+import { Platform, Pressable, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as z from "zod";
 
@@ -256,6 +253,7 @@ export default function FormScreen() {
                 label="Enable reminder"
                 description="We will send you notification reminder."
                 {...field}
+                value={field.value ?? false}
               />
             )}
           />

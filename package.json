@@ -12,7 +12,7 @@
     "ios": "expo run:ios",
     "web": "expo start -c --web",
     "export": "expo export -p web",
-    "format": "biome check --no-errors-on-unmatched --write .",
+    "format": "biome check --write .",
     "db:generate": "bun drizzle-kit generate",
     "db:studio": "bun drizzle-kit studio"
   },

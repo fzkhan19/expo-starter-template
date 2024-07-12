@@ -12,8 +12,6 @@ import {
 import { Button } from "@/components/ui/button";
 import {
   Form,
-  FormCheckbox,
-  FormCombobox,
   FormElement,
   FormField,
   FormInput,
@@ -47,7 +45,7 @@ import {
 } from "expo-router";
 import * as React from "react";
 import { useForm } from "react-hook-form";
-import { Alert, Pressable, ScrollView, View } from "react-native";
+import { ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as z from "zod";
 
@@ -117,10 +115,7 @@ export default function FormScreen() {
     return {
       name: "",
       description: "",
-      duration: {
-        label: "",
-        value: "",
-      },
+      duration: "",
       category: {
         label: "",
         value: "",
@@ -132,7 +127,6 @@ export default function FormScreen() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: defaultValues,
-    values: defaultValues,
   });
 
   const contentInsets = {
@@ -147,15 +141,23 @@ export default function FormScreen() {
       .from(habitTable)
       .where(eq(habitTable.id, id as string))
       .execute();
-    if (fetchedHabit) {
-      setHabit(fetchedHabit[0]);
+    if (fetchedHabit && fetchedHabit.length > 0) {
+      const habit: Habit = {
+        ...fetchedHabit[0],
+        enableNotifications: fetchedHabit[0].enableNotifications ?? false,
+      };
+      setHabit(habit);
     }
   };
   const handleDeleteHabit = async () => {
     // Are you sure you want to delete this Habit ?
     try {
-      await db?.delete(habitTable).where(eq(habitTable.id, id)).execute();
-      router.replace("/");
+      if (id && typeof id === "string") {
+        await db?.delete(habitTable).where(eq(habitTable.id, id)).execute();
+        router.replace("/");
+      } else {
+        console.error("Invalid id");
+      }
     } catch (error) {
       console.error("error", error);
     }
@@ -320,6 +322,7 @@ export default function FormScreen() {
                   label="Enable reminder"
                   description="We will send you notification reminder."
                   {...field}
+                  value={field.value ?? false}
                 />
               )}
             />

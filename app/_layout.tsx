@@ -1,16 +1,16 @@
-import {PortalHost} from "@/components/primitives/portal";
-import {DatabaseProvider} from "@/db/provider";
-import {setAndroidNavigationBar} from "@/lib/android-navigation-bar";
-import {NAV_THEME} from "@/lib/constants";
-import {useColorScheme} from "@/lib/useColorScheme";
-import {BottomSheetModalProvider} from "@gorhom/bottom-sheet";
+import { PortalHost } from "@/components/primitives/portal";
+import { DatabaseProvider } from "@/db/provider";
+import { setAndroidNavigationBar } from "@/lib/android-navigation-bar";
+import { NAV_THEME } from "@/lib/constants";
+import { useColorScheme } from "@/lib/useColorScheme";
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import {ThemeProvider, type Theme} from "@react-navigation/native";
-import {SplashScreen, Stack} from "expo-router";
-import {StatusBar} from "expo-status-bar";
+import { type Theme, ThemeProvider } from "@react-navigation/native";
+import { SplashScreen, Stack } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import * as React from "react";
-import {Platform} from "react-native";
-import {GestureHandlerRootView} from "react-native-gesture-handler";
+import { Platform } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "./styles.css";
 
 const LIGHT_THEME: Theme = {
@@ -24,7 +24,7 @@ const DARK_THEME: Theme = {
 
 export {
   // Catch any errors thrown by the Layout component.
-  ErrorBoundary
+  ErrorBoundary,
 } from "expo-router";
 
 export const unstable_settings = {
@@ -35,7 +35,7 @@ export const unstable_settings = {
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const {colorScheme, setColorScheme, isDarkColorScheme} = useColorScheme();
+  const { colorScheme, setColorScheme, isDarkColorScheme } = useColorScheme();
   const [isColorSchemeLoaded, setIsColorSchemeLoaded] = React.useState(false);
 
   React.useEffect(() => {
@@ -69,19 +69,18 @@ export default function RootLayout() {
     return null;
   }
 
-
   return (
     <>
       <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
         <DatabaseProvider>
           <StatusBar style={isDarkColorScheme ? "light" : "dark"} />
-          <GestureHandlerRootView style={{flex: 1}}>
+          <GestureHandlerRootView style={{ flex: 1 }}>
             <BottomSheetModalProvider>
               <Stack initialRouteName="index">
                 <Stack.Screen name="index" />
                 <Stack.Screen
                   name="create"
-                  options={{presentation: "containedModal"}}
+                  options={{ presentation: "containedModal" }}
                 />
 
                 <Stack.Screen

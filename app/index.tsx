@@ -2,14 +2,12 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { useScrollToTop } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
-import { eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
-import { Link, Stack, useFocusEffect, useRouter } from "expo-router";
+import { Link, Stack, useRouter } from "expo-router";
 import * as React from "react";
 import { Pressable, View } from "react-native";
 
-import { Plus, PlusCircle } from "@/components/Icons";
-import { Progress } from "@/components/ui/progress";
+import { Plus } from "@/components/Icons";
 import { Text } from "@/components/ui/text";
 import { useMigrationHelper } from "@/db/drizzle";
 import { useDatabase } from "@/db/provider";
@@ -42,7 +40,17 @@ export default function Screen() {
 
 function ScreenContent() {
   const { db } = useDatabase();
-  const { data: habits, error } = useLiveQuery(db?.select().from(habitTable));
+
+  if (!db)
+    return (
+      <View className="flex-1 items-center justify-center bg-secondary/30">
+        <Text className="text-destructive pb-2 ">Error Loading data</Text>
+      </View>
+    );
+
+  const { data: habitsData, error } = useLiveQuery(
+    db.select().from(habitTable),
+  );
 
   const ref = React.useRef(null);
   useScrollToTop(ref);
@@ -61,6 +69,13 @@ function ScreenContent() {
       </View>
     );
   }
+
+  const habits: Habit[] =
+    habitsData?.map((habit) => ({
+      ...habit,
+      enableNotifications: habit.enableNotifications ?? false,
+    })) || [];
+
   return (
     <View className="flex-1 gap-5 p-6 bg-secondary/30">
       <Stack.Screen
@@ -87,7 +102,7 @@ function ScreenContent() {
             </Text>
             <Text className="text-sm">
               If you change the schema, you need to run{" "}
-              <Text className="text-sm font-mono text-muted-foreground bg-muted">
+              <Text className="text-sm text-muted-foreground bg-muted">
                 bun migrate
               </Text>
             </Text>
