@@ -1,27 +1,26 @@
-import {useScrollToTop} from "@react-navigation/native";
-import {FlashList} from "@shopify/flash-list";
-import {eq} from "drizzle-orm";
-import {Link, Stack, useFocusEffect, useRouter} from "expo-router";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { Button } from "@/components/ui/button";
+import { useScrollToTop } from "@react-navigation/native";
+import { FlashList } from "@shopify/flash-list";
+import { eq } from "drizzle-orm";
+import { useLiveQuery } from "drizzle-orm/expo-sqlite";
+import { Link, Stack, useFocusEffect, useRouter } from "expo-router";
 import * as React from "react";
-import {Pressable, View} from "react-native";
-import {ThemeToggle} from "@/components/ThemeToggle";
-import {Button} from "@/components/ui/button";
-import {useLiveQuery} from "drizzle-orm/expo-sqlite";
+import { Pressable, View } from "react-native";
 
-import {Progress} from "@/components/ui/progress";
-import {Text} from "@/components/ui/text";
-import {habitTable} from "@/db/schema";
-import {Plus, PlusCircle} from "@/components/Icons";
-import {useMigrationHelper} from "@/db/drizzle";
-import {useDatabase} from "@/db/provider";
-import {SettingsIcon} from "lucide-react-native";
+import { Plus, PlusCircle } from "@/components/Icons";
+import { Progress } from "@/components/ui/progress";
+import { Text } from "@/components/ui/text";
+import { useMigrationHelper } from "@/db/drizzle";
+import { useDatabase } from "@/db/provider";
+import { habitTable } from "@/db/schema";
+import { SettingsIcon } from "lucide-react-native";
 
-
-import {HabitCard} from "@/components/habit";
-import type {Habit} from "@/lib/storage";
+import { HabitCard } from "@/components/habit";
+import type { Habit } from "@/lib/storage";
 
 export default function Screen() {
-  const {success, error} = useMigrationHelper();
+  const { success, error } = useMigrationHelper();
 
   if (error) {
     return (
@@ -42,8 +41,8 @@ export default function Screen() {
 }
 
 function ScreenContent() {
-  const {db} = useDatabase();
-  const {data: habits, error} = useLiveQuery(db?.select().from(habitTable));
+  const { db } = useDatabase();
+  const { data: habits, error } = useLiveQuery(db?.select().from(habitTable));
 
   const ref = React.useRef(null);
   useScrollToTop(ref);
@@ -51,7 +50,7 @@ function ScreenContent() {
   const router = useRouter();
 
   const renderItem = React.useCallback(
-    ({item}: {item: Habit}) => <HabitCard {...item} />,
+    ({ item }: { item: Habit }) => <HabitCard {...item} />,
     [],
   );
 
@@ -64,7 +63,6 @@ function ScreenContent() {
   }
   return (
     <View className="flex-1 gap-5 p-6 bg-secondary/30">
-
       <Stack.Screen
         options={{
           title: "Habits",
@@ -98,7 +96,7 @@ function ScreenContent() {
         ItemSeparatorComponent={() => <View className="p-2" />}
         data={habits}
         renderItem={renderItem}
-        keyExtractor={(_, index) => `item-${ index }`}
+        keyExtractor={(_, index) => `item-${index}`}
         ListFooterComponent={<View className="py-4" />}
       />
       <View className="absolute bottom-10 right-8">

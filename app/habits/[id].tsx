@@ -1,17 +1,3 @@
-import {zodResolver} from "@hookform/resolvers/zod";
-import {createInsertSchema} from "drizzle-zod";
-import {
-  Stack,
-  useFocusEffect,
-  useLocalSearchParams,
-  useRouter,
-} from "expo-router";
-import * as React from "react";
-import {useForm} from "react-hook-form";
-import {Alert, Pressable, ScrollView, View} from "react-native";
-import {useSafeAreaInsets} from "react-native-safe-area-context";
-import * as z from "zod";
-import {eq} from "drizzle-orm";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,22 +8,22 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
-import {Button} from "@/components/ui/button";
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormCheckbox,
   FormCombobox,
+  FormElement,
   FormField,
   FormInput,
   FormRadioGroup,
   FormSelect,
-  FormElement,
   FormSwitch,
   FormTextarea,
 } from "@/components/ui/form";
-import {Label} from "@/components/ui/label";
-import {RadioGroupItem} from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { RadioGroupItem } from "@/components/ui/radio-group";
 import {
   SelectContent,
   SelectGroup,
@@ -45,28 +31,42 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {Text} from "@/components/ui/text";
-import {useDatabase} from "@/db/provider";
-import {habitTable} from "@/db/schema";
-import {cn} from "@/lib/utils";
-import type {Habit} from "@/lib/storage";
+import { Text } from "@/components/ui/text";
+import { useDatabase } from "@/db/provider";
+import { habitTable } from "@/db/schema";
+import type { Habit } from "@/lib/storage";
+import { cn } from "@/lib/utils";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { eq } from "drizzle-orm";
+import { createInsertSchema } from "drizzle-zod";
+import {
+  Stack,
+  useFocusEffect,
+  useLocalSearchParams,
+  useRouter,
+} from "expo-router";
+import * as React from "react";
+import { useForm } from "react-hook-form";
+import { Alert, Pressable, ScrollView, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import * as z from "zod";
 
 const HabitCategories = [
-  {value: "health", label: "Health And Wellness"},
-  {value: "personal-development", label: "Personal Development"},
-  {value: "social-and-relationshipts", label: "Social And Relationships"},
-  {value: "productivity", label: "Productivity"},
-  {value: "creativity", label: "Creativity"},
-  {value: "mindfulness", label: "Mindfulness"},
-  {value: "financial", label: "Financial"},
-  {value: "leisure", label: "Leisure"},
+  { value: "health", label: "Health And Wellness" },
+  { value: "personal-development", label: "Personal Development" },
+  { value: "social-and-relationshipts", label: "Social And Relationships" },
+  { value: "productivity", label: "Productivity" },
+  { value: "creativity", label: "Creativity" },
+  { value: "mindfulness", label: "Mindfulness" },
+  { value: "financial", label: "Financial" },
+  { value: "leisure", label: "Leisure" },
 ];
 
 const HabitDurations = [
-  {value: 5, label: "5 minutes"},
-  {value: 10, label: "10 minutes"},
-  {value: 15, label: "15 minutes"},
-  {value: 30, label: "30 minutes"},
+  { value: 5, label: "5 minutes" },
+  { value: 10, label: "10 minutes" },
+  { value: 15, label: "15 minutes" },
+  { value: 30, label: "30 minutes" },
 ];
 
 const formSchema = createInsertSchema(habitTable, {
@@ -79,7 +79,7 @@ const formSchema = createInsertSchema(habitTable, {
       message: "We need to know.",
     }),
   category: z.object(
-    {value: z.string(), label: z.string()},
+    { value: z.string(), label: z.string() },
     {
       invalid_type_error: "Please select category",
     },
@@ -91,12 +91,12 @@ const formSchema = createInsertSchema(habitTable, {
 // TODO: refactor to use UI components
 
 export default function FormScreen() {
-  const {db} = useDatabase();
+  const { db } = useDatabase();
   const router = useRouter();
   const scrollRef = React.useRef<ScrollView>(null);
   const insets = useSafeAreaInsets();
   const [habit, setHabit] = React.useState<Habit>();
-  const {id} = useLocalSearchParams<{id: string}>();
+  const { id } = useLocalSearchParams<{ id: string }>();
 
   const [selectTriggerWidth, setSelectTriggerWidth] = React.useState(0);
   useFocusEffect(
@@ -112,25 +112,27 @@ export default function FormScreen() {
         category: HabitCategories.find((cat) => cat.value === habit.category),
         duration: habit.duration,
         enableNotifications: habit?.enableNotifications,
-      }
+      };
     }
     return {
       name: "",
       description: "",
       duration: {
-        label: "", value: ""
+        label: "",
+        value: "",
       },
       category: {
-        label: "", value: ""
+        label: "",
+        value: "",
       },
       enableNotifications: false,
-    }
-  }, [habit])
+    };
+  }, [habit]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: defaultValues,
-    values: defaultValues
+    values: defaultValues,
   });
 
   const contentInsets = {
@@ -146,36 +148,37 @@ export default function FormScreen() {
       .where(eq(habitTable.id, id as string))
       .execute();
     if (fetchedHabit) {
-      setHabit(fetchedHabit[0])
+      setHabit(fetchedHabit[0]);
     }
   };
   const handleDeleteHabit = async () => {
     // Are you sure you want to delete this Habit ?
     try {
       await db?.delete(habitTable).where(eq(habitTable.id, id)).execute();
-      router.replace("/")
+      router.replace("/");
     } catch (error) {
-      console.error("error", error)
+      console.error("error", error);
     }
-
   };
 
   async function handleSubmit(values: z.infer<typeof formSchema>) {
     try {
-      await db?.update(habitTable).set({
-        name: values.name,
-        description: values.description,
-        duration: Number(values.duration),
-        category: values.category.value,
-        enableNotifications: values.enableNotifications,
-      }).where(eq(habitTable.id, id as string))
+      await db
+        ?.update(habitTable)
+        .set({
+          name: values.name,
+          description: values.description,
+          duration: Number(values.duration),
+          category: values.category.value,
+          enableNotifications: values.enableNotifications,
+        })
+        .where(eq(habitTable.id, id as string))
         .execute();
 
       router.replace("/");
     } catch (error) {
-      console.error("error", error)
+      console.error("error", error);
     }
-
   }
   return (
     <ScrollView
@@ -183,26 +186,23 @@ export default function FormScreen() {
       contentContainerClassName="p-6 mx-auto w-full max-w-xl"
       showsVerticalScrollIndicator={false}
       automaticallyAdjustContentInsets={false}
-      contentInset={{top: 12}}
+      contentInset={{ top: 12 }}
     >
       <Stack.Screen
         options={{
           title: "Habit",
         }}
       />
-      <FormElement
-        onSubmit={handleSubmit} >
-
+      <FormElement onSubmit={handleSubmit}>
         <Form {...form}>
           <View className="gap-7">
             <FormField
               control={form.control}
               name="name"
-              render={({field}) => (
+              render={({ field }) => (
                 <FormInput
                   label="Name"
                   className="text-foreground"
-
                   placeholder="habit name"
                   description="This will help you remind."
                   autoCapitalize="none"
@@ -214,10 +214,9 @@ export default function FormScreen() {
             <FormField
               control={form.control}
               name="description"
-              render={({field}) => (
+              render={({ field }) => (
                 <FormTextarea
                   label="Description"
-
                   placeholder="Habit for ..."
                   description="habit description"
                   {...field}
@@ -228,15 +227,12 @@ export default function FormScreen() {
             <FormField
               control={form.control}
               name="category"
-              render={({field}) => {
+              render={({ field }) => {
                 return (
                   <FormSelect
                     label="Category"
                     description="Select on of the habit description"
                     {...field}
-
-
-
                   >
                     <SelectTrigger
                       onLayout={(ev) => {
@@ -246,14 +242,16 @@ export default function FormScreen() {
                       <SelectValue
                         className={cn(
                           "text-sm native:text-lg",
-                          field.value ? "text-foreground" : "text-muted-foreground",
+                          field.value
+                            ? "text-foreground"
+                            : "text-muted-foreground",
                         )}
                         placeholder="Select a habit category"
                       />
                     </SelectTrigger>
                     <SelectContent
                       insets={contentInsets}
-                      style={{width: selectTriggerWidth}}
+                      style={{ width: selectTriggerWidth }}
                     >
                       <SelectGroup>
                         {HabitCategories.map((cat) => (
@@ -268,14 +266,14 @@ export default function FormScreen() {
                       </SelectGroup>
                     </SelectContent>
                   </FormSelect>
-                )
+                );
               }}
             />
 
             <FormField
               control={form.control}
               name="duration"
-              render={({field}) => {
+              render={({ field }) => {
                 function onLabelPress(value: number) {
                   return () => {
                     form.setValue("duration", value);
@@ -296,11 +294,11 @@ export default function FormScreen() {
                           className={"flex-row gap-2 items-center"}
                         >
                           <RadioGroupItem
-                            aria-labelledby={`label-for-${ item.label }`}
+                            aria-labelledby={`label-for-${item.label}`}
                             value={item.value.toString()}
                           />
                           <Label
-                            nativeID={`label-for-${ item.label }`}
+                            nativeID={`label-for-${item.label}`}
                             className="capitalize"
                             onPress={onLabelPress(item.value)}
                           >
@@ -317,7 +315,7 @@ export default function FormScreen() {
             <FormField
               control={form.control}
               name="enableNotifications"
-              render={({field}) => (
+              render={({ field }) => (
                 <FormSwitch
                   label="Enable reminder"
                   description="We will send you notification reminder."
@@ -326,18 +324,18 @@ export default function FormScreen() {
               )}
             />
 
-            <Button disabled={!form.formState.isDirty} onPress={form.handleSubmit(handleSubmit)}>
+            <Button
+              disabled={!form.formState.isDirty}
+              onPress={form.handleSubmit(handleSubmit)}
+            >
               <Text>Update</Text>
             </Button>
-
-
           </View>
         </Form>
       </FormElement>
       <AlertDialog>
         <AlertDialogTrigger asChild>
           <Button
-
             variant="destructive"
             className="shadow shadow-foreground/5 my-4"
           >
@@ -355,7 +353,10 @@ export default function FormScreen() {
             <AlertDialogCancel>
               <Text>Cancel</Text>
             </AlertDialogCancel>
-            <AlertDialogAction className="bg-destructive" onPress={handleDeleteHabit}>
+            <AlertDialogAction
+              className="bg-destructive"
+              onPress={handleDeleteHabit}
+            >
               <Text>Continue</Text>
             </AlertDialogAction>
           </AlertDialogFooter>
